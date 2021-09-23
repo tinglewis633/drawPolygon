@@ -1,0 +1,13 @@
+input {
+  width: 100%;
+  padding: 1em 1em;
+  margin: 1em 1em;
+}
+
+.fail {
+  color: green;
+}
+
+.pass {
+  color: red;
+}

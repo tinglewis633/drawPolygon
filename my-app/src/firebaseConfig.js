@@ -39,10 +39,20 @@ export async function addCircleCoords(coords, radius) {
   const db = getFirestore();
   const docRef = await addDoc(collection(db, "Circle Coords"), {
     coords,
-    radius
+    radius,
   });
   console.log("successfully added circle coords!!!!");
   await updateDoc(doc(db, "Circle Coords", docRef.id), {
+    id: docRef.id,
+  });
+}
+export async function addRectangleCoords(coords) {
+  const db = getFirestore();
+  const docRef = await addDoc(collection(db, "Rectangle Coords"), {
+    coords,
+  });
+  console.log("successfully added rectangle coords!!!!");
+  await updateDoc(doc(db, "Rectangle Coords", docRef.id), {
     id: docRef.id,
   });
 }
@@ -56,8 +66,7 @@ export async function fetchPolygonCoords() {
   });
 
   console.log("Fectched Polygon Data!!!");
-  console.log(dataArr);
-  return dataArr;
+  return dataArr.reverse();
 }
 
 export async function fetchCircleCoords() {
@@ -69,6 +78,18 @@ export async function fetchCircleCoords() {
   });
 
   console.log("Fectched Circle Data!!!");
-  console.log(dataArr);
+
+  return dataArr.reverse();
+}
+
+export async function fetchRectangleCoords() {
+  const db = getFirestore();
+  const dataArr = [];
+  const querySnapshot = await getDocs(collection(db, "Rectangle Coords"));
+  querySnapshot.forEach((doc) => {
+    dataArr.push(doc.data());
+  });
+
+  console.log("Fectched Rectangle Data!!!");
   return dataArr;
 }

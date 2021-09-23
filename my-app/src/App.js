@@ -1,29 +1,30 @@
+// importing components for react-google-map
 import {
   LoadScript,
   GoogleMap,
   DrawingManager,
   Polygon,
-  circle,
+  Marker,
   Circle,
 } from "@react-google-maps/api";
 import { useEffect } from "react";
 import "./App.css";
 import { coordsStore } from "./store/store";
+// importing firestore functions
 import {
   addPolygonCoords,
   fetchPolygonCoords,
   addCircleCoords,
   fetchCircleCoords,
+  addRectangleCoords,
+  fetchRectangleCoords,
 } from "./firebaseConfig";
+import SearchBar from "./SearchBar";
 function App() {
-  const path = [
-    { lat: 52.522300516078666, lng: 13.388037335784121 },
-    { lat: 52.541932316055984, lng: 13.447775494963809 },
-    { lat: 52.50642157993388, lng: 13.459448468596621 },
-    { lat: 52.48761015505172, lng: 13.39730705013959 },
-  ];
   const polygonCoords = coordsStore.useState((s) => s.polygonCoords);
   const circleCoords = coordsStore.useState((s) => s.circleCoords);
+  const rectangleCoords = coordsStore.useState((s) => s.rectangleCoords);
+
   const onLoad = (drawingManager) => {
     return;
   };
@@ -33,7 +34,14 @@ function App() {
   };
 
   const onRectangleComplete = (rectangle) => {
-    console.log("REC", rectangle);
+    let rectangleCoords = [
+      { lat: rectangle.bounds.tc.g, lng: rectangle.bounds.Hb.g },
+      { lat: rectangle.bounds.tc.g, lng: rectangle.bounds.Hb.i },
+      { lat: rectangle.bounds.tc.i, lng: rectangle.bounds.Hb.i },
+      { lat: rectangle.bounds.tc.i, lng: rectangle.bounds.Hb.g },
+    ];
+
+    addRectangleCoords(rectangleCoords);
   };
 
   const onCircleComplete = (circle) => {
@@ -66,9 +74,8 @@ function App() {
               lat: transformedData[i],
             });
           }
-          final1Data.push(finalData);
+          final1Data.push({ coords: finalData, id: coord.id });
         });
-
         coordsStore.update((s) => {
           s.polygonCoords = final1Data;
         });
@@ -82,15 +89,26 @@ function App() {
         s.circleCoords = data;
       });
     });
+
+    // fetch RectangleCoords
+    fetchRectangleCoords().then((data) => {
+      coordsStore.update((s) => {
+        s.rectangleCoords = data;
+      });
+    });
   }, []);
-  console.log("I AM CIRCLE", circleCoords);
-  console.log("I AM POLYGON", polygonCoords);
-  if (polygonCoords.length === 0 && circleCoords.length === 0) {
+
+  if (
+    //if no shapes in firestore
+    polygonCoords.length === 0 &&
+    circleCoords.length === 0 &&
+    rectangleCoords.length === 0
+  ) {
     return (
       <div className='App'>
         <LoadScript
           id='script-loader'
-          googleMapsApiKey='AIzaSyBgxJ-padRN_a3sczwqk7sB1NPkuObA2gk&libraries=drawing'
+          googleMapsApiKey='AIzaSyBgxJ-padRN_a3sczwqk7sB1NPkuObA2gk&libraries=drawing,geometry'
           language='en'
           region='us'
         >
@@ -114,15 +132,16 @@ function App() {
   } else {
     return (
       <div className='App'>
+        <SearchBar />
         <LoadScript
           id='script-loader'
-          googleMapsApiKey='AIzaSyBgxJ-padRN_a3sczwqk7sB1NPkuObA2gk&libraries=drawing'
+          googleMapsApiKey='AIzaSyBgxJ-padRN_a3sczwqk7sB1NPkuObA2gk&libraries=drawing,geometry'
           language='en'
           region='us'
         >
           <GoogleMap
             mapContainerClassName='App-map'
-            zoom={13}
+            zoom={12}
             center={{ lat: 43.144794456372686, lng: -79.49327825652 }}
             version='weekly'
             on
@@ -133,10 +152,14 @@ function App() {
               onRectangleComplete={onRectangleComplete}
               onCircleComplete={onCircleComplete}
             />
-            <Circle
-              center={{ lat: 43.18063928920623, lng: -79.47475442862635 }}
-              radius={1763.9035453745257}
+            <Marker
+              position={{
+                lat: 43.138127311993976,
+                lng: -79.48152958876135,
+              }}
             />
+
+            {/*For each circle coord output a circle  */}
             {circleCoords.map((coord) => (
               <Circle
                 center={coord.coords}
@@ -144,9 +167,14 @@ function App() {
                 key={coord.id}
               />
             ))}
-            {polygonCoords.map((coord) => (
-              <Polygon path={coord} key={coord.id} />
-            ))}
+            {/*For each polygon coord output a polygon  */}
+            {polygonCoords.map((coord) => {
+              return <Polygon path={coord.coords} key={coord.id} />;
+            })}
+            {/*For each rectangle coord output a rectangle  */}
+            {rectangleCoords.map((coord) => {
+              return <Polygon path={coord.coords} key={coord.id} />;
+            })}
           </GoogleMap>
         </LoadScript>
       </div>
