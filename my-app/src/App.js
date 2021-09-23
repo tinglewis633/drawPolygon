@@ -31,41 +31,93 @@ function App() {
 
   useEffect(() => {
     fetchCoords().then((data) => {
-      console.log("DATAAAAAAA", data);
-      coordsStore.update((s) => {
-        s.coords = data;
-      });
+      let final1Data = [];
+      if (data.length > 0) {
+        data.forEach((coord) => {
+          let finalData = [];
+          let transformedData = null;
+          {
+            transformedData = coord.coords
+              .toString()
+              .replace(/[{()}]/g, "")
+              .replace(/ /g, "")
+              .split(",")
+              .map((coord) => parseFloat(coord));
+            console.log("TRANS", transformedData);
+            for (let i = 0; i < transformedData.length; i = i + 2) {
+              finalData.push({
+                lng: transformedData[i + 1],
+                lat: transformedData[i],
+              });
+            }
+            console.log("FINALLLLDATA", finalData);
+            final1Data.push(finalData);
+          }
+        });
 
+        coordsStore.update((s) => {
+          s.coords = final1Data;
+        });
+      }
       return;
     });
   }, []);
-  console.log("HI");
-  console.log("COORDS FETCHED", coords);
-  return (
-    <div className='App'>
-      <LoadScript
-        id='script-loader'
-        googleMapsApiKey='AIzaSyBgxJ-padRN_a3sczwqk7sB1NPkuObA2gk&libraries=drawing'
-        language='en'
-        region='us'
-      >
-        <GoogleMap
-          mapContainerClassName='App-map'
-          zoom={12}
-          center={{ lat: 52.52549080781086, lng: 13.398118538856465 }}
-          version='weekly'
-          on
+
+  console.log("COORDSSSS", coords);
+  if (coords.length === 0) {
+    return (
+      <div className='App'>
+        <LoadScript
+          id='script-loader'
+          googleMapsApiKey='AIzaSyBgxJ-padRN_a3sczwqk7sB1NPkuObA2gk&libraries=drawing'
+          language='en'
+          region='us'
         >
-          <DrawingManager
-            onLoad={onLoad}
-            onPolygonComplete={onPolygonComplete}
-            onRectangleComplete={onRectangleComplete}
-          />
-          <Polygon path={path} />
-        </GoogleMap>
-      </LoadScript>
-    </div>
-  );
+          <GoogleMap
+            mapContainerClassName='App-map'
+            zoom={12}
+            center={{ lat: 52.52549080781086, lng: 13.398118538856465 }}
+            version='weekly'
+            on
+          >
+            <DrawingManager
+              onLoad={onLoad}
+              onPolygonComplete={onPolygonComplete}
+              onRectangleComplete={onRectangleComplete}
+            />
+          </GoogleMap>
+        </LoadScript>
+      </div>
+    );
+  } else {
+    return (
+      <div className='App'>
+        <LoadScript
+          id='script-loader'
+          googleMapsApiKey='AIzaSyBgxJ-padRN_a3sczwqk7sB1NPkuObA2gk&libraries=drawing'
+          language='en'
+          region='us'
+        >
+          <GoogleMap
+            mapContainerClassName='App-map'
+            zoom={12}
+            center={{ lat: 52.52549080781086, lng: 13.398118538856465 }}
+            version='weekly'
+            on
+          >
+            <DrawingManager
+              onLoad={onLoad}
+              onPolygonComplete={onPolygonComplete}
+              onRectangleComplete={onRectangleComplete}
+            />
+            {coords.map((coord) => (
+              <Polygon path={coord} />
+            ))}
+          </GoogleMap>
+        </LoadScript>
+      </div>
+    );
+  }
 }
 
 export default App;

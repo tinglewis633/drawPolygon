@@ -42,7 +42,7 @@ export async function fetchCoords() {
   querySnapshot.forEach((doc) => {
     dataArr.push(doc.data());
   });
-  console.log(dataArr);
+
   console.log("Fectched Data!!!");
   return dataArr;
 }
