@@ -8,6 +8,7 @@ import {
   getDocs,
   setDoc,
   deleteDoc,
+  updateDoc,
 } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -23,26 +24,51 @@ const firebaseConfig = {
 // Initialize Firebase
 initializeApp(firebaseConfig);
 
-export async function addCoords(coords) {
+export async function addPolygonCoords(coords) {
   const db = getFirestore();
-  await addDoc(collection(db, "Coords"), {
+  const docRef = await addDoc(collection(db, "Polygon Coords"), {
     coords,
   });
-  console.log("successfully added coords!!!!");
-  // await setDoc(doc(db, "Coords", docRef.id), {
-  //   ...formDoc,
-  //   id: docRef.id,
-  // });
+  console.log("successfully added polygon coords!!!!");
+  await updateDoc(doc(db, "Polygon Coords", docRef.id), {
+    id: docRef.id,
+  });
 }
 
-export async function fetchCoords() {
+export async function addCircleCoords(coords, radius) {
+  const db = getFirestore();
+  const docRef = await addDoc(collection(db, "Circle Coords"), {
+    coords,
+    radius
+  });
+  console.log("successfully added circle coords!!!!");
+  await updateDoc(doc(db, "Circle Coords", docRef.id), {
+    id: docRef.id,
+  });
+}
+
+export async function fetchPolygonCoords() {
   const db = getFirestore();
   const dataArr = [];
-  const querySnapshot = await getDocs(collection(db, "Coords"));
+  const querySnapshot = await getDocs(collection(db, "Polygon Coords"));
   querySnapshot.forEach((doc) => {
     dataArr.push(doc.data());
   });
 
-  console.log("Fectched Data!!!");
+  console.log("Fectched Polygon Data!!!");
+  console.log(dataArr);
+  return dataArr;
+}
+
+export async function fetchCircleCoords() {
+  const db = getFirestore();
+  const dataArr = [];
+  const querySnapshot = await getDocs(collection(db, "Circle Coords"));
+  querySnapshot.forEach((doc) => {
+    dataArr.push(doc.data());
+  });
+
+  console.log("Fectched Circle Data!!!");
+  console.log(dataArr);
   return dataArr;
 }
