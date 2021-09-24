@@ -9,6 +9,7 @@ function SearchBar() {
   const rectangleCoords = coordsStore.useState((s) => s.rectangleCoords);
   const circleCoords = coordsStore.useState((s) => s.circleCoords);
   const polygonCoords = coordsStore.useState((s) => s.polygonCoords);
+  const markerCoord = appStore.useState((s) => s.markerCoord);
   function searchInput(e) {
     appStore.update((s) => {
       s.search = e.target.value;
@@ -27,8 +28,19 @@ function SearchBar() {
         },
       })
       .then((response) => {
+        appStore.update((s) => {
+          s.addressPass = true;
+        });
+
         const checkLat = response.data.results[0].geometry.location.lat;
         const checkLng = response.data.results[0].geometry.location.lng;
+
+        appStore.update((s) => {
+          s.markerCoord = {
+            lat: checkLat,
+            lng: checkLng,
+          };
+        });
 
         // check if the input address coord falls into the circle areas
         circleCoords.forEach((coord) => {
@@ -62,24 +74,36 @@ function SearchBar() {
         });
         // check if the input address coord falls into the polygon areas
         polygonCoords.forEach((coord) => {
+          console.log("COORD", coord);
           const filtered = coord.coords.filter((coord) => coord.lng > checkLng);
-
+          console.log("FILTER", filtered);
+          console.log("LAT", checkLat);
+          console.log("LNG", checkLng);
           let count = 0;
           for (let i = 0; i < filtered.length - 1; i++) {
-            const bigLatDifference = Math.abs(
-              filtered[i].lat - filtered[i + 1].lat
-            );
-            const smallLatDifference = Math.abs(filtered[i].lat - checkLat);
-
+            if (
+              (filtered[i].lat > checkLat && filtered[i + 1].lat < checkLat) ||
+              (filtered[i].lat < checkLat && filtered[i + 1].lat > checkLat)
+            ) {
+              const bigLatDifference = Math.abs(
+                filtered[i].lat - filtered[i + 1].lat
+              );
+              const smallLatDifference = Math.abs(filtered[i].lat - checkLat);
+              
             if (bigLatDifference > smallLatDifference) {
               count = count + 1;
             }
+            }
+
           }
 
+          console.log("COUNT", count);
           if (count % 2 == 1) {
             appStore.update((s) => {
               s.addressPass = false;
             });
+
+            console.log("HI");
           }
         });
 

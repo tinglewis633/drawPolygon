@@ -6,7 +6,8 @@ export const coordsStore = new Store({
 });
 
 export const appStore = new Store({
-  search: "",
+  search: "5128 Philp Rd, Beamsville, ON L0R 1B2",
   addressPass: true,
   searched: false,
+  markerCoord: {},
 });

@@ -9,7 +9,7 @@ import {
 } from "@react-google-maps/api";
 import { useEffect } from "react";
 import "./App.css";
-import { coordsStore } from "./store/store";
+import { coordsStore, appStore } from "./store/store";
 // importing firestore functions
 import {
   addPolygonCoords,
@@ -24,7 +24,7 @@ function App() {
   const polygonCoords = coordsStore.useState((s) => s.polygonCoords);
   const circleCoords = coordsStore.useState((s) => s.circleCoords);
   const rectangleCoords = coordsStore.useState((s) => s.rectangleCoords);
-
+  const markerCoord = appStore.useState((s) => s.markerCoord);
   const onLoad = (drawingManager) => {
     return;
   };
@@ -97,7 +97,7 @@ function App() {
       });
     });
   }, []);
-
+  console.log("MARKER", markerCoord);
   if (
     //if no shapes in firestore
     polygonCoords.length === 0 &&
@@ -154,11 +154,11 @@ function App() {
             />
             <Marker
               position={{
-                lat: 43.138127311993976,
-                lng: -79.48152958876135,
+                lat:43.12871493357892,
+                lng: -79.43947021525385,
               }}
             />
-
+            {markerCoord && <Marker position={markerCoord} />}
             {/*For each circle coord output a circle  */}
             {circleCoords.map((coord) => (
               <Circle
