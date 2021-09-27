@@ -1,0 +1,10 @@
+button {
+  margin: 1em 1em;
+}
+
+.info-list {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}

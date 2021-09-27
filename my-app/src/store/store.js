@@ -6,9 +6,19 @@ export const coordsStore = new Store({
 });
 
 export const appStore = new Store({
-  search: "5128 Philp Rd, Beamsville, ON L0R 1B2",
   addressPass: true,
   searched: false,
   markerCoord: {},
   address: "5128 Philp Rd, Beamsville, ON L0R 1B2",
+  drawToggle: false,
+  cuurentCircleID: "",
+  cuurentRectangleID: "",
+  cuurentPolygonID: "",
+});
+
+export const shapeFormStore = new Store({
+  shapeForm: {
+    name: "",
+    description: "",
+  },
 });

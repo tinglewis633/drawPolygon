@@ -33,6 +33,7 @@ export async function addPolygonCoords(coords) {
   await updateDoc(doc(db, "Polygon Coords", docRef.id), {
     id: docRef.id,
   });
+  return docRef.id;
 }
 
 export async function addCircleCoords(coords, radius) {
@@ -45,6 +46,7 @@ export async function addCircleCoords(coords, radius) {
   await updateDoc(doc(db, "Circle Coords", docRef.id), {
     id: docRef.id,
   });
+  return docRef.id;
 }
 export async function addRectangleCoords(coords) {
   const db = getFirestore();
@@ -54,6 +56,17 @@ export async function addRectangleCoords(coords) {
   console.log("successfully added rectangle coords!!!!");
   await updateDoc(doc(db, "Rectangle Coords", docRef.id), {
     id: docRef.id,
+  });
+  return docRef.id;
+}
+export async function addShapeInfo(shapeInfo, shape, shapeID) {
+  console.log("shapeinfo", shapeInfo);
+  console.log("SHPAE", shape);
+  console.log("SHPAEID", shapeID);
+  const db = getFirestore();
+
+  await updateDoc(doc(db, `${shape} Coords`, shapeID), {
+    info: shapeInfo,
   });
 }
 
@@ -66,7 +79,7 @@ export async function fetchPolygonCoords() {
   });
 
   console.log("Fectched Polygon Data!!!");
-  return dataArr.reverse();
+  return dataArr;
 }
 
 export async function fetchCircleCoords() {
@@ -79,7 +92,7 @@ export async function fetchCircleCoords() {
 
   console.log("Fectched Circle Data!!!");
 
-  return dataArr.reverse();
+  return dataArr;
 }
 
 export async function fetchRectangleCoords() {
