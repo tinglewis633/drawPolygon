@@ -16,10 +16,10 @@
 
 .search-bar {
   display: flex;
+  width: 70vw;
 }
 
 button {
   height: 3em;
   align-self: center;
 }
-

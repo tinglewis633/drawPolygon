@@ -1,8 +1,14 @@
 import React from "react";
 import axios from "axios";
 import "./SearchBar.css";
+import PlacesAutocomplete, {
+  geocodeByAddress,
+  geocodeByPlaceId,
+  getLatLng,
+} from "react-places-autocomplete";
 import { appStore, coordsStore } from "./store/store";
 function SearchBar() {
+  // const [address, setAddress] = React.useState("");
   const search = appStore.useState((s) => s.search);
   const addressPass = appStore.useState((s) => s.addressPass);
   const searched = appStore.useState((s) => s.searched);
@@ -10,6 +16,7 @@ function SearchBar() {
   const circleCoords = coordsStore.useState((s) => s.circleCoords);
   const polygonCoords = coordsStore.useState((s) => s.polygonCoords);
   const markerCoord = appStore.useState((s) => s.markerCoord);
+  const address = appStore.useState((s) => s.address);
   function searchInput(e) {
     appStore.update((s) => {
       s.search = e.target.value;
@@ -17,13 +24,23 @@ function SearchBar() {
   }
 
   const point = { lat: 40.144794456372686, lng: -75.41317825652716 };
+  const handleChange = (e) => {
+    appStore.update((s) => {
+      s.address = e;
+    });
+  };
 
+  const handleSelect = async (e) => {
+    appStore.update((s) => {
+      s.address = e;
+    });
+  };
   function checkAddress() {
     //change address input to lat and lng using geo api
     axios
       .get("https://maps.googleapis.com/maps/api/geocode/json", {
         params: {
-          address: search,
+          address: address,
           key: "AIzaSyBgxJ-padRN_a3sczwqk7sB1NPkuObA2gk",
         },
       })
@@ -74,36 +91,31 @@ function SearchBar() {
         });
         // check if the input address coord falls into the polygon areas
         polygonCoords.forEach((coord) => {
-          console.log("COORD", coord);
-          const filtered = coord.coords.filter((coord) => coord.lng > checkLng);
-          console.log("FILTER", filtered);
-          console.log("LAT", checkLat);
-          console.log("LNG", checkLng);
           let count = 0;
-          for (let i = 0; i < filtered.length - 1; i++) {
+          console.log("COORD", coord.coords);
+          for (let i = 0; i < coord.coords.length - 1; i++) {
             if (
-              (filtered[i].lat > checkLat && filtered[i + 1].lat < checkLat) ||
-              (filtered[i].lat < checkLat && filtered[i + 1].lat > checkLat)
+              (coord.coords[i].lat > checkLat &&
+                coord.coords[i + 1].lat < checkLat) ||
+              (coord.coords[i].lat < checkLat &&
+                coord.coords[i + 1].lat > checkLat)
             ) {
-              const bigLatDifference = Math.abs(
-                filtered[i].lat - filtered[i + 1].lat
-              );
-              const smallLatDifference = Math.abs(filtered[i].lat - checkLat);
-              
-            if (bigLatDifference > smallLatDifference) {
-              count = count + 1;
+              const slope =
+                (coord.coords[i + 1].lat - coord.coords[i].lat) /
+                (coord.coords[i + 1].lng - coord.coords[i].lng);
+              const intercept =
+                coord.coords[i + 1].lat - slope * coord.coords[i + 1].lng;
+              const cross = (checkLat - intercept) / slope;
+              if (cross > checkLng) {
+                count = count + 1;
+              }
             }
-            }
-
           }
-
           console.log("COUNT", count);
-          if (count % 2 == 1) {
+          if (count % 2 === 1) {
             appStore.update((s) => {
               s.addressPass = false;
             });
-
-            console.log("HI");
           }
         });
 
@@ -115,9 +127,43 @@ function SearchBar() {
 
   return (
     <div>
-      <div className='search-bar'>
-        <input onChange={searchInput} value={search} />
-        <button onClick={checkAddress}>test</button>
+      <div>
+        <PlacesAutocomplete
+          value={address}
+          onChange={handleChange}
+          onSelect={handleSelect}
+        >
+          {({
+            getInputProps,
+            suggestions,
+            getSuggestionItemProps,
+            loading,
+          }) => (
+            <div>
+              <div className='search-bar'>
+                <input {...getInputProps({ placeholder: "Type address" })} />
+                <button onClick={checkAddress}>test</button>
+              </div>
+              <div>
+                {loading ? <div>...loading</div> : null}
+
+                {suggestions.map((suggestion) => {
+                  const style = {
+                    backgroundColor: suggestion.active ? "#41b6e6" : "#fff",
+                  };
+                  return (
+                    <li
+                      key={suggestion.id}
+                      {...getSuggestionItemProps(suggestion, { style })}
+                    >
+                      {suggestion.description}
+                    </li>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </PlacesAutocomplete>
       </div>
       {!addressPass && searched && (
         <div className='pass'>
@@ -126,7 +172,7 @@ function SearchBar() {
       )}
       {addressPass && searched && (
         <div className='fail'>
-          The address you entered does not falls in the restricted area
+          The address you entered does not fall in the restricted area
         </div>
       )}
       <br /> <br />

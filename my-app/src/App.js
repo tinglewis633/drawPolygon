@@ -19,6 +19,7 @@ import {
   addRectangleCoords,
   fetchRectangleCoords,
 } from "./firebaseConfig";
+
 import SearchBar from "./SearchBar";
 function App() {
   const polygonCoords = coordsStore.useState((s) => s.polygonCoords);
@@ -108,7 +109,7 @@ function App() {
       <div className='App'>
         <LoadScript
           id='script-loader'
-          googleMapsApiKey='AIzaSyBgxJ-padRN_a3sczwqk7sB1NPkuObA2gk&libraries=drawing,geometry'
+          googleMapsApiKey='AIzaSyBgxJ-padRN_a3sczwqk7sB1NPkuObA2gk&libraries=drawing,places'
           language='en'
           region='us'
         >
@@ -132,13 +133,14 @@ function App() {
   } else {
     return (
       <div className='App'>
-        <SearchBar />
         <LoadScript
           id='script-loader'
-          googleMapsApiKey='AIzaSyBgxJ-padRN_a3sczwqk7sB1NPkuObA2gk&libraries=drawing,geometry'
+          googleMapsApiKey='AIzaSyBgxJ-padRN_a3sczwqk7sB1NPkuObA2gk&libraries=drawing,places'
           language='en'
           region='us'
         >
+          <SearchBar />
+          <button>Create New</button>
           <GoogleMap
             mapContainerClassName='App-map'
             zoom={12}
@@ -154,8 +156,8 @@ function App() {
             />
             <Marker
               position={{
-                lat:43.12871493357892,
-                lng: -79.43947021525385,
+                lng: -79.42081147683076,
+                lat: 43.137827,
               }}
             />
             {markerCoord && <Marker position={markerCoord} />}
