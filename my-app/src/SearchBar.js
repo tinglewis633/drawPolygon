@@ -1,11 +1,7 @@
 import React from "react";
 import axios from "axios";
 import "./SearchBar.css";
-import PlacesAutocomplete, {
-  geocodeByAddress,
-  geocodeByPlaceId,
-  getLatLng,
-} from "react-places-autocomplete";
+import PlacesAutocomplete from "react-places-autocomplete";
 import { appStore, coordsStore } from "./store/store";
 function SearchBar() {
   // const [address, setAddress] = React.useState("");
@@ -15,15 +11,9 @@ function SearchBar() {
   const rectangleCoords = coordsStore.useState((s) => s.rectangleCoords);
   const circleCoords = coordsStore.useState((s) => s.circleCoords);
   const polygonCoords = coordsStore.useState((s) => s.polygonCoords);
-  const markerCoord = appStore.useState((s) => s.markerCoord);
-  const address = appStore.useState((s) => s.address);
-  function searchInput(e) {
-    appStore.update((s) => {
-      s.search = e.target.value;
-    });
-  }
 
-  const point = { lat: 40.144794456372686, lng: -75.41317825652716 };
+  const address = appStore.useState((s) => s.address);
+
   const handleChange = (e) => {
     appStore.update((s) => {
       s.address = e;
@@ -92,7 +82,7 @@ function SearchBar() {
         // check if the input address coord falls into the polygon areas
         polygonCoords.forEach((coord) => {
           let count = 0;
-          console.log("COORD", coord.coords);
+
           for (let i = 0; i < coord.coords.length - 1; i++) {
             if (
               (coord.coords[i].lat > checkLat &&
@@ -111,7 +101,7 @@ function SearchBar() {
               }
             }
           }
-          console.log("COUNT", count);
+
           if (count % 2 === 1) {
             appStore.update((s) => {
               s.addressPass = false;
@@ -144,7 +134,7 @@ function SearchBar() {
                 <input {...getInputProps({ placeholder: "Type address" })} />
                 <button onClick={checkAddress}>test</button>
               </div>
-              <div>
+              <div >
                 {loading ? <div>...loading</div> : null}
 
                 {suggestions.map((suggestion) => {

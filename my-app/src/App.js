@@ -9,17 +9,15 @@ import {
 } from "@react-google-maps/api";
 import { useEffect } from "react";
 import "./App.css";
-import { coordsStore, appStore } from "./store/store";
+import { coordsStore, appStore, shapeStore } from "./store/store";
 // importing firestore functions
 import {
-  addPolygonCoords,
   fetchPolygonCoords,
-  addCircleCoords,
   fetchCircleCoords,
-  addRectangleCoords,
   fetchRectangleCoords,
 } from "./firebaseConfig";
 import ShapeInfoList from "./ShapeInfoList";
+import ShapeInfoForm from "./ShapeInfoForm";
 import SearchBar from "./SearchBar";
 function App() {
   const polygonCoords = coordsStore.useState((s) => s.polygonCoords);
@@ -27,71 +25,63 @@ function App() {
   const rectangleCoords = coordsStore.useState((s) => s.rectangleCoords);
   const markerCoord = appStore.useState((s) => s.markerCoord);
   const drawToggle = appStore.useState((s) => s.drawToggle);
-  const currentCircleID = appStore.useState((s) => s.currentCircleID);
-  const currentRectangleID = appStore.useState((s) => s.currentRectangleID);
-  const currentPolygonID = appStore.useState((s) => s.currentPolygonID);
-  //direct to form if any shape is completed
-  if (currentCircleID !== undefined) {
-    window.location.href = `/shape-info-form/Circle/${currentCircleID}`;
-  } else if (currentRectangleID !== undefined) {
-    window.location.href = `/shape-info-form/Rectangle/${currentRectangleID}`;
-  } else if (currentPolygonID !== undefined) {
-    window.location.href = `/shape-info-form/Polygon/${currentPolygonID}`;
-  }
+  const formToggle = appStore.useState((s) => s.formToggle);
+
   const onLoad = (drawingManager) => {
     return;
   };
 
   const onPolygonComplete = (polygon) => {
-    addPolygonCoords([polygon.getPath().getArray().toString()]).then((data) => {
-      console.log("DATA", data);
-      appStore.update((s) => {
-        s.currentPolygonID = data;
-      });
+    shapeStore.update((s) => {
+      s.currentShapeData = [polygon.getPath().getArray().toString()];
+    });
+
+    shapeStore.update((s) => {
+      s.currentShape = "Polygon";
     });
     appStore.update((s) => {
       s.drawToggle = false;
+    });
+    appStore.update((s) => {
+      s.formToggle = true;
     });
   };
 
   const onRectangleComplete = (rectangle) => {
-    let rectangleCoords = [
-      { lat: rectangle.bounds.tc.g, lng: rectangle.bounds.Hb.g },
-      { lat: rectangle.bounds.tc.g, lng: rectangle.bounds.Hb.i },
-      { lat: rectangle.bounds.tc.i, lng: rectangle.bounds.Hb.i },
-      { lat: rectangle.bounds.tc.i, lng: rectangle.bounds.Hb.g },
-    ];
+    shapeStore.update((s) => {
+      s.currentShapeData = rectangle;
+    });
 
-    addRectangleCoords(rectangleCoords).then((data) => {
-      console.log("DATA", data);
-      appStore.update((s) => {
-        s.currentRectangleID = data;
-      });
+    shapeStore.update((s) => {
+      s.currentShape = "Rectangle";
     });
     appStore.update((s) => {
       s.drawToggle = false;
+    });
+    appStore.update((s) => {
+      s.formToggle = true;
     });
   };
 
   const onCircleComplete = (circle) => {
-    let circleCoords = {
-      lat: circle.center.lat(),
-      lng: circle.center.lng(),
-    };
-    addCircleCoords(circleCoords, circle.radius).then((data) => {
-      console.log("DATA", data);
-      appStore.update((s) => {
-        s.currentCircleID = data;
-      });
+    shapeStore.update((s) => {
+      s.currentShapeData = circle;
+    });
+
+    shapeStore.update((s) => {
+      s.currentShape = "Circle";
     });
     appStore.update((s) => {
       s.drawToggle = false;
+    });
+    appStore.update((s) => {
+      s.formToggle = true;
     });
   };
 
   const drawNewShape = () => {
     appStore.update((s) => {
-      s.drawToggle = true;
+      s.drawToggle = !s.drawToggle;
     });
   };
 
@@ -144,12 +134,13 @@ function App() {
       });
     });
   }, []);
-  console.log("MARKER", markerCoord);
+
   if (
     //if no shapes in firestore
     polygonCoords.length === 0 &&
     circleCoords.length === 0 &&
-    rectangleCoords.length === 0
+    rectangleCoords.length === 0 &&
+    !formToggle
   ) {
     return (
       <div className='App'>
@@ -176,11 +167,9 @@ function App() {
         </LoadScript>
       </div>
     );
-  }
-  // else if (currentCircleID || currentPolygonID || currentRectangleID) {
-  //   <div>HI</div>;
-  // }
-  else {
+  } else if (formToggle) {
+    return <ShapeInfoForm />;
+  } else {
     return (
       <div className='main'>
         <div className='App'>

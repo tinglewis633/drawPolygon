@@ -14,9 +14,7 @@ ReactDOM.render(
           <App />
         </Route>
 
-        <Route path='/shape-info-form/:shape/:id'>
-          <ShapeInfoForm />
-        </Route>
+    
 
         <Route render={() => <Redirect to='/' />} />
       </Switch>

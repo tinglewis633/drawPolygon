@@ -24,10 +24,11 @@ const firebaseConfig = {
 // Initialize Firebase
 initializeApp(firebaseConfig);
 
-export async function addPolygonCoords(coords) {
+export async function addPolygonCoords(coords, infoForm) {
   const db = getFirestore();
   const docRef = await addDoc(collection(db, "Polygon Coords"), {
     coords,
+    info: infoForm,
   });
   console.log("successfully added polygon coords!!!!");
   await updateDoc(doc(db, "Polygon Coords", docRef.id), {
@@ -36,11 +37,12 @@ export async function addPolygonCoords(coords) {
   return docRef.id;
 }
 
-export async function addCircleCoords(coords, radius) {
+export async function addCircleCoords(coords, radius, infoForm) {
   const db = getFirestore();
   const docRef = await addDoc(collection(db, "Circle Coords"), {
     coords,
     radius,
+    info: infoForm,
   });
   console.log("successfully added circle coords!!!!");
   await updateDoc(doc(db, "Circle Coords", docRef.id), {
@@ -48,26 +50,17 @@ export async function addCircleCoords(coords, radius) {
   });
   return docRef.id;
 }
-export async function addRectangleCoords(coords) {
+export async function addRectangleCoords(coords, infoForm) {
   const db = getFirestore();
   const docRef = await addDoc(collection(db, "Rectangle Coords"), {
     coords,
+    info: infoForm,
   });
   console.log("successfully added rectangle coords!!!!");
   await updateDoc(doc(db, "Rectangle Coords", docRef.id), {
     id: docRef.id,
   });
   return docRef.id;
-}
-export async function addShapeInfo(shapeInfo, shape, shapeID) {
-  console.log("shapeinfo", shapeInfo);
-  console.log("SHPAE", shape);
-  console.log("SHPAEID", shapeID);
-  const db = getFirestore();
-
-  await updateDoc(doc(db, `${shape} Coords`, shapeID), {
-    info: shapeInfo,
-  });
 }
 
 export async function fetchPolygonCoords() {
@@ -105,4 +98,26 @@ export async function fetchRectangleCoords() {
 
   console.log("Fectched Rectangle Data!!!");
   return dataArr;
+}
+
+export async function fetchCurrentShapeData(shape, id) {
+  const db = getFirestore();
+  const docRef = doc(db, `${shape} Coords`, id);
+  const docSnap = await getDoc(docRef);
+  console.log("Fectched Current Shape Data!!!");
+  return docSnap.data();
+}
+
+export async function deleteShapeData(shape, id) {
+  const db = getFirestore();
+
+  await deleteDoc(doc(db, `${shape} Coords`, id));
+}
+
+export async function updateShape(shape, infoForm, id) {
+  const db = getFirestore();
+
+  await updateDoc(doc(db, `${shape} Coords`, id), {
+    info: infoForm,
+  });
 }

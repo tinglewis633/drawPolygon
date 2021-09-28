@@ -1,14 +1,21 @@
-import { useEffect } from "react";
-import { coordsStore, shapeFormStore } from "./store/store";
-import { useParams } from "react-router-dom";
-import { addShapeInfo } from "./firebaseConfig";
+import {
+  coordsStore,
+  shapeFormStore,
+  appStore,
+  shapeStore,
+} from "./store/store";
+import {
+  addPolygonCoords,
+  addCircleCoords,
+  addRectangleCoords,
+  updateShape,
+} from "./firebaseConfig";
+
 function ShapeInfoForm() {
-  const params = useParams();
-  const id = params.id;
-  const shape = params.shape;
-
+  const currentShape = shapeStore.useState((s) => s.currentShape);
   const shapeForm = shapeFormStore.useState((s) => s.shapeForm);
-
+  const currentShapeData = shapeStore.useState((s) => s.currentShapeData);
+  const currentShapeID = shapeStore.useState((s) => s.currentShapeID);
   const updateFormDoc = (value, field) => {
     shapeFormStore.update((s) => {
       s.shapeForm = { ...s.shapeForm, [field]: value };
@@ -16,10 +23,59 @@ function ShapeInfoForm() {
   };
 
   const submitShapeInfoForm = async () => {
-    await addShapeInfo(shapeForm, shape, id);
-    window.location.href = "/";
+    // condition when user creating rectangle
+    if (currentShape === "Rectangle" && currentShapeData) {
+      let rectangleCoords = [
+        {
+          lat: currentShapeData.bounds.tc.g,
+          lng: currentShapeData.bounds.Hb.g,
+        },
+        {
+          lat: currentShapeData.bounds.tc.g,
+          lng: currentShapeData.bounds.Hb.i,
+        },
+        {
+          lat: currentShapeData.bounds.tc.i,
+          lng: currentShapeData.bounds.Hb.i,
+        },
+        {
+          lat: currentShapeData.bounds.tc.i,
+          lng: currentShapeData.bounds.Hb.g,
+        },
+      ];
+      console.log("DATAAA", rectangleCoords);
+      await addRectangleCoords(rectangleCoords, shapeForm);
+
+      window.location.href = "/";
+    } else if (currentShape === "Rectangle" && !currentShapeData) {
+      await updateShape("Rectangle", shapeForm, currentShapeID);
+      window.location.href = "/";
+    }
+
+    // condition when user creating rectangle
+    if (currentShape === "Circle" && currentShapeData) {
+      let circleCoords = {
+        lat: currentShapeData.center.lat(),
+        lng: currentShapeData.center.lng(),
+      };
+
+      await addCircleCoords(circleCoords, currentShapeData.radius, shapeForm);
+      window.location.href = "/";
+    } else if (currentShape === "Circle" && !currentShapeData) {
+      await updateShape("Circle", shapeForm, currentShapeID);
+      window.location.href = "/";
+    }
+
+    // condition when user creating polygon
+    if (currentShape === "Polygon" && currentShapeData) {
+      await addPolygonCoords(currentShapeData, shapeForm);
+      window.location.href = "/";
+    } else if (currentShape === "Polygon" && !currentShapeData) {
+      await updateShape("Polygon", shapeForm, currentShapeID);
+      window.location.href = "/";
+    }
   };
-  console.log(shapeForm);
+
   return (
     <div>
       <form>
@@ -32,6 +88,7 @@ function ShapeInfoForm() {
             updateFormDoc(e.target.value, "name");
           }}
           placeholder='Name'
+          value={shapeForm.name}
         />
         <br />
         <p>Description:</p>
@@ -41,6 +98,7 @@ function ShapeInfoForm() {
             updateFormDoc(e.target.value, "description");
           }}
           placeholder='Description'
+          value={shapeForm.description}
         />
         <br />
         <input type='button' onClick={submitShapeInfoForm} value='Submit' />
