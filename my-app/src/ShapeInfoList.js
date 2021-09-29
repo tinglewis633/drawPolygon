@@ -14,7 +14,7 @@ function ShapeInfoForm() {
   const shapeForm = shapeFormStore.useState((s) => s.shapeForm);
 
   const deleteCircle = (e) => {
-    console.log("HIHI", e.target);
+
     const id = e.target.getAttribute("id");
     deleteShapeData("Circle", id);
     const tempCircleCoord = circleCoords.filter((coord) => coord.id !== id);
@@ -95,7 +95,6 @@ function ShapeInfoForm() {
     });
   };
 
-  console.log("SHAPEFORM", shapeForm);
   return (
     <div className='info-list'>
       <h1>Circles</h1>

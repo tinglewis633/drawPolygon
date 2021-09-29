@@ -114,7 +114,7 @@ export async function deleteShapeData(shape, id) {
   await deleteDoc(doc(db, `${shape} Coords`, id));
 }
 
-export async function updateShape(shape, infoForm, id) {
+export async function updateShapeInfo(shape, infoForm, id) {
   const db = getFirestore();
 
   await updateDoc(doc(db, `${shape} Coords`, id), {

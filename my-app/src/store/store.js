@@ -3,6 +3,8 @@ export const coordsStore = new Store({
   polygonCoords: [],
   circleCoords: [],
   rectangleCoords: [],
+  mapCenterCoord: { lat: 43.144794456372686, lng: -79.49327825652 },
+  selectedCoord: null,
 });
 
 export const appStore = new Store({

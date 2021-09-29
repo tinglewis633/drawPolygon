@@ -8,7 +8,7 @@ import {
   addPolygonCoords,
   addCircleCoords,
   addRectangleCoords,
-  updateShape,
+  updateShapeInfo,
 } from "./firebaseConfig";
 
 function ShapeInfoForm() {
@@ -43,12 +43,12 @@ function ShapeInfoForm() {
           lng: currentShapeData.bounds.Hb.g,
         },
       ];
-      console.log("DATAAA", rectangleCoords);
+
       await addRectangleCoords(rectangleCoords, shapeForm);
 
       window.location.href = "/";
     } else if (currentShape === "Rectangle" && !currentShapeData) {
-      await updateShape("Rectangle", shapeForm, currentShapeID);
+      await updateShapeInfo("Rectangle", shapeForm, currentShapeID);
       window.location.href = "/";
     }
 
@@ -62,7 +62,7 @@ function ShapeInfoForm() {
       await addCircleCoords(circleCoords, currentShapeData.radius, shapeForm);
       window.location.href = "/";
     } else if (currentShape === "Circle" && !currentShapeData) {
-      await updateShape("Circle", shapeForm, currentShapeID);
+      await updateShapeInfo("Circle", shapeForm, currentShapeID);
       window.location.href = "/";
     }
 
@@ -71,7 +71,7 @@ function ShapeInfoForm() {
       await addPolygonCoords(currentShapeData, shapeForm);
       window.location.href = "/";
     } else if (currentShape === "Polygon" && !currentShapeData) {
-      await updateShape("Polygon", shapeForm, currentShapeID);
+      await updateShapeInfo("Polygon", shapeForm, currentShapeID);
       window.location.href = "/";
     }
   };
