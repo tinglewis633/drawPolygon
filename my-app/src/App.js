@@ -16,6 +16,7 @@ import {
   fetchPolygonCoords,
   fetchCircleCoords,
   fetchRectangleCoords,
+  updateShapeCoord,
 } from "./firebaseConfig";
 import ShapeInfoList from "./ShapeInfoList";
 import ShapeInfoForm from "./ShapeInfoForm";
@@ -29,8 +30,11 @@ function App() {
   const markerCoord = appStore.useState((s) => s.markerCoord);
   const drawToggle = appStore.useState((s) => s.drawToggle);
   const formToggle = appStore.useState((s) => s.formToggle);
-  const currentShapeData = shapeStore.useState((s) => s.currentShapeData);
+  const currentShapeDataForMap = shapeStore.useState(
+    (s) => s.currentShapeDataForMap
+  );
   const mapRef = useRef(null);
+  const circleRefs = useRef(new Array());
 
   const onDrawingLoad = (drawingManager) => {
     return;
@@ -39,6 +43,7 @@ function App() {
   const onMapLoad = (map) => {
     mapRef.current = map;
   };
+  
   function handleCenter() {
     if (!mapRef.current) return;
     const lat = mapRef.current.getCenter().lat();
@@ -153,6 +158,7 @@ function App() {
     });
   }, []);
 
+  //find which circle it clicked then set state:currentShapeDataForMap to that shape
   const clickCircle = (e) => {
     const lat = e.latLng.lat();
     const lng = e.latLng.lng();
@@ -172,12 +178,13 @@ function App() {
 
       if (circleRaidusInDegree > pointRaidus) {
         shapeStore.update((s) => {
-          s.currentShapeData = coord;
+          s.currentShapeDataForMap = coord;
         });
       }
     });
   };
 
+  //find which Rectangle it clicked then set state:currentShapeDataForMap to that shape
   const clickRectangle = (e) => {
     const lat = e.latLng.lat();
     const lng = e.latLng.lng();
@@ -193,12 +200,13 @@ function App() {
         coord.coords[0].lng < lng
       ) {
         shapeStore.update((s) => {
-          s.currentShapeData = coord;
+          s.currentShapeDataForMap = coord;
         });
       }
     });
   };
 
+  //find which Polygon it clicked then set state:currentShapeDataForMap to that shape
   const clickPolygon = (e) => {
     const lat = e.latLng.lat();
     const lng = e.latLng.lng();
@@ -229,12 +237,12 @@ function App() {
 
       if (count % 2 === 1) {
         shapeStore.update((s) => {
-          s.currentShapeData = coord;
+          s.currentShapeDataForMap = coord;
         });
       }
     });
   };
-  console.log("HEIHS", selectedCoord);
+
   if (
     //if no shapes in firestore
     polygonCoords.length === 0 &&
@@ -309,14 +317,17 @@ function App() {
               />
               {markerCoord.lat && <Marker position={markerCoord} />}
               {/*For each circle coord output a circle  */}
-              {circleCoords.map((coord) => (
-                <Circle
-                  center={coord.coords}
-                  radius={coord.radius}
-                  key={coord.id}
-                  onClick={clickCircle}
-                />
-              ))}
+              {circleCoords.map((coord) => {
+                return (
+                  <Circle
+                    ref={(element) => circleRefs.current.push(element)}
+                    center={coord.coords}
+                    radius={coord.radius}
+                    key={coord.id}
+                    onClick={clickCircle}
+                  />
+                );
+              })}
               {/*For each polygon coord output a polygon  */}
               {polygonCoords.map((coord) => {
                 return (
@@ -339,7 +350,7 @@ function App() {
               })}
 
               {/* when a shape is clicked, set latlng to selectedCoord and show infowindow */}
-              {selectedCoord && currentShapeData && (
+              {selectedCoord && currentShapeDataForMap && (
                 <InfoWindow
                   position={selectedCoord}
                   onCloseClick={() => {
@@ -351,9 +362,9 @@ function App() {
                   <div>
                     <h1>Info</h1>
                     <h4>Name:</h4>
-                    <p>{currentShapeData.info.name}</p>
+                    <p>{currentShapeDataForMap.info.name}</p>
                     <h4>Description:</h4>
-                    <p>{currentShapeData.info.description}</p>
+                    <p>{currentShapeDataForMap.info.description}</p>
                   </div>
                 </InfoWindow>
               )}

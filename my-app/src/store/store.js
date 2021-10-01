@@ -20,6 +20,7 @@ export const shapeStore = new Store({
   cuurentShapeID: "",
   currentShape: "",
   currentShapeData: "",
+  currentShapeDataForMap: "",
 });
 
 export const shapeFormStore = new Store({

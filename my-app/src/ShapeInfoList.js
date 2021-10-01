@@ -12,14 +12,16 @@ function ShapeInfoForm() {
   const circleCoords = coordsStore.useState((s) => s.circleCoords);
   const rectangleCoords = coordsStore.useState((s) => s.rectangleCoords);
   const shapeForm = shapeFormStore.useState((s) => s.shapeForm);
-
+  const selectedCoord = coordsStore.useState((s) => s.selectedCoord);
   const deleteCircle = (e) => {
-
     const id = e.target.getAttribute("id");
     deleteShapeData("Circle", id);
     const tempCircleCoord = circleCoords.filter((coord) => coord.id !== id);
     coordsStore.update((s) => {
       s.circleCoords = tempCircleCoord;
+    });
+    coordsStore.update((s) => {
+      s.selectedCoord = null;
     });
   };
   const deleteRectangle = (e) => {
@@ -31,6 +33,9 @@ function ShapeInfoForm() {
     coordsStore.update((s) => {
       s.rectangleCoords = tempRectangleCoord;
     });
+    coordsStore.update((s) => {
+      s.selectedCoord = null;
+    });
   };
   const deletePolygon = (e) => {
     const id = e.target.getAttribute("id");
@@ -38,6 +43,9 @@ function ShapeInfoForm() {
     const tempPolygonCoord = polygonCoords.filter((coord) => coord.id !== id);
     coordsStore.update((s) => {
       s.polygonCoords = tempPolygonCoord;
+    });
+    coordsStore.update((s) => {
+      s.selectedCoord = null;
     });
   };
 

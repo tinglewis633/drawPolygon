@@ -121,3 +121,11 @@ export async function updateShapeInfo(shape, infoForm, id) {
     info: infoForm,
   });
 }
+
+export async function updateShapeCoord(shape, coords, id) {
+  const db = getFirestore();
+
+  await updateDoc(doc(db, `${shape} Coords`, id), {
+    coords
+  });
+}
